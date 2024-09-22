@@ -4,6 +4,7 @@ ADDED from C:\Users\shahd\AndroidStudioProjects\Optica\app\src\main\AndroidManif
 INJECTED from C:\Users\shahd\AndroidStudioProjects\Optica\app\src\main\AndroidManifest.xml:2:1-121:12
 INJECTED from C:\Users\shahd\AndroidStudioProjects\Optica\app\src\main\AndroidManifest.xml:2:1-121:12
 INJECTED from C:\Users\shahd\AndroidStudioProjects\Optica\app\src\main\AndroidManifest.xml:2:1-121:12
+MERGED from [com.android.volley:volley:1.2.1] C:\Users\shahd\.gradle\caches\transforms-3\a4c95b7276db6e661146141bcd45fac9\transformed\jetified-volley-1.2.1\AndroidManifest.xml:2:1-7:12
 MERGED from [com.google.mlkit:face-detection:16.1.7] C:\Users\shahd\.gradle\caches\transforms-3\7bb95bb9b513d9898328c9dcc7ccebe9\transformed\jetified-face-detection-16.1.7\AndroidManifest.xml:2:1-8:12
 MERGED from [com.google.mlkit:pose-detection:18.0.0-beta5] C:\Users\shahd\.gradle\caches\transforms-3\2581abc86e20cbae30b843d90144c4b8\transformed\jetified-pose-detection-18.0.0-beta5\AndroidManifest.xml:2:1-9:12
 MERGED from [com.google.mlkit:pose-detection-accurate:18.0.0-beta5] C:\Users\shahd\.gradle\caches\transforms-3\aa28178abdb99f1c25843dca892f8693\transformed\jetified-pose-detection-accurate-18.0.0-beta5\AndroidManifest.xml:2:1-9:12
@@ -119,6 +120,8 @@ uses-sdk
 ADDED from C:\Users\shahd\AndroidStudioProjects\Optica\app\src\main\AndroidManifest.xml:12:5-16:60
 INJECTED from C:\Users\shahd\AndroidStudioProjects\Optica\app\src\main\AndroidManifest.xml:12:5-16:60
 INJECTED from C:\Users\shahd\AndroidStudioProjects\Optica\app\src\main\AndroidManifest.xml:12:5-16:60
+MERGED from [com.android.volley:volley:1.2.1] C:\Users\shahd\.gradle\caches\transforms-3\a4c95b7276db6e661146141bcd45fac9\transformed\jetified-volley-1.2.1\AndroidManifest.xml:5:5-43
+MERGED from [com.android.volley:volley:1.2.1] C:\Users\shahd\.gradle\caches\transforms-3\a4c95b7276db6e661146141bcd45fac9\transformed\jetified-volley-1.2.1\AndroidManifest.xml:5:5-43
 MERGED from [com.google.mlkit:face-detection:16.1.7] C:\Users\shahd\.gradle\caches\transforms-3\7bb95bb9b513d9898328c9dcc7ccebe9\transformed\jetified-face-detection-16.1.7\AndroidManifest.xml:6:5-44
 MERGED from [com.google.mlkit:face-detection:16.1.7] C:\Users\shahd\.gradle\caches\transforms-3\7bb95bb9b513d9898328c9dcc7ccebe9\transformed\jetified-face-detection-16.1.7\AndroidManifest.xml:6:5-44
 MERGED from [com.google.mlkit:pose-detection:18.0.0-beta5] C:\Users\shahd\.gradle\caches\transforms-3\2581abc86e20cbae30b843d90144c4b8\transformed\jetified-pose-detection-18.0.0-beta5\AndroidManifest.xml:5:5-44
