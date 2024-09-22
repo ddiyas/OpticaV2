@@ -79,7 +79,7 @@ public final class CameraXSourceDemoActivity extends AppCompatActivity implement
 
     private PreviewView previewView;
     private GraphicOverlay graphicOverlay;
-    TextToSpeech textToSpeech;
+    private TextToSpeech textToSpeech;
 
     private boolean needUpdateGraphicOverlayImageSourceInfo;
 
@@ -93,7 +93,8 @@ public final class CameraXSourceDemoActivity extends AppCompatActivity implement
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate");
-        textToSpeech = new TextToSpeech(getApplicationContext().getApplicationContext(), status -> {
+
+        textToSpeech = new TextToSpeech(getApplicationContext(), status -> {
             if (status != TextToSpeech.ERROR) {
                 textToSpeech.setLanguage(Locale.ENGLISH);
             }
@@ -101,13 +102,7 @@ public final class CameraXSourceDemoActivity extends AppCompatActivity implement
 
         setContentView(R.layout.activity_vision_cameraxsource_demo);
         previewView = findViewById(R.id.preview_view);
-        if (previewView == null) {
-            Log.d(TAG, "previewView is null");
-        }
         graphicOverlay = findViewById(R.id.graphic_overlay);
-        if (graphicOverlay == null) {
-            Log.d(TAG, "graphicOverlay is null");
-        }
 
         ToggleButton facingSwitch = findViewById(R.id.facing_switch);
         facingSwitch.setOnCheckedChangeListener(this);
@@ -118,20 +113,20 @@ public final class CameraXSourceDemoActivity extends AppCompatActivity implement
             intent.putExtra(SettingsActivity.EXTRA_LAUNCH_SOURCE, SettingsActivity.LaunchSource.CAMERAXSOURCE_DEMO);
             startActivity(intent);
         });
+
         detectionTaskCallback = detectionTask -> detectionTask.addOnSuccessListener(this::onDetectionTaskSuccess).addOnFailureListener(this::onDetectionTaskFailure);
     }
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         lensFacing = lensFacing == CameraSourceConfig.CAMERA_FACING_FRONT ? CameraSourceConfig.CAMERA_FACING_BACK : CameraSourceConfig.CAMERA_FACING_FRONT;
-
         createThenStartCameraXSource();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (cameraXSource != null && PreferenceUtils.getCustomObjectDetectorOptionsForLivePreview(this, localModel).equals(customObjectDetectorOptions) && PreferenceUtils.getCameraXTargetResolution(getApplicationContext(), lensFacing) != null && Objects.requireNonNull(PreferenceUtils.getCameraXTargetResolution(getApplicationContext(), lensFacing)).equals(targetResolution)) {
+        if (cameraXSource != null && PreferenceUtils.getCustomObjectDetectorOptionsForLivePreview(this, localModel).equals(customObjectDetectorOptions) && Objects.equals(PreferenceUtils.getCameraXTargetResolution(getApplicationContext(), lensFacing), targetResolution)) {
             cameraXSource.start();
         } else {
             createThenStartCameraXSource();
@@ -152,6 +147,7 @@ public final class CameraXSourceDemoActivity extends AppCompatActivity implement
         if (cameraXSource != null) {
             cameraXSource.close();
         }
+        textToSpeech.shutdown();
     }
 
     private void createThenStartCameraXSource() {
@@ -160,6 +156,7 @@ public final class CameraXSourceDemoActivity extends AppCompatActivity implement
         }
         customObjectDetectorOptions = PreferenceUtils.getCustomObjectDetectorOptionsForLivePreview(getApplicationContext(), localModel);
         ObjectDetector objectDetector = ObjectDetection.getClient(customObjectDetectorOptions);
+
         CameraSourceConfig.Builder builder = new CameraSourceConfig.Builder(getApplicationContext(), objectDetector, detectionTaskCallback).setFacing(lensFacing);
         targetResolution = PreferenceUtils.getCameraXTargetResolution(getApplicationContext(), lensFacing);
         if (targetResolution != null) {
@@ -175,48 +172,42 @@ public final class CameraXSourceDemoActivity extends AppCompatActivity implement
         if (needUpdateGraphicOverlayImageSourceInfo) {
             Size size = cameraXSource.getPreviewSize();
             if (size != null) {
-                Log.d(TAG, "preview width: " + size.getWidth());
-                Log.d(TAG, "preview height: " + size.getHeight());
                 boolean isImageFlipped = cameraXSource.getCameraFacing() == CameraSourceConfig.CAMERA_FACING_FRONT;
                 if (isPortraitMode()) {
-                    // Swap width and height sizes when in portrait, since it will be rotated by
-                    // 90 degrees. The camera preview and the image being processed have the same size.
                     graphicOverlay.setImageSourceInfo(size.getHeight(), size.getWidth(), isImageFlipped);
                 } else {
                     graphicOverlay.setImageSourceInfo(size.getWidth(), size.getHeight(), isImageFlipped);
                 }
                 needUpdateGraphicOverlayImageSourceInfo = false;
-            } else {
-                Log.d(TAG, "previewsize is null");
             }
         }
-        Log.v(TAG, "Number of object been detected: " + results.size());
+
         JSONArray objectList = new JSONArray();
         for (DetectedObject object : results) {
             if (object.getLabels().size() > 0) {
                 String objectName = object.getLabels().get(0).getText();
-                speakText(objectName);
+//                speakText(objectName);
                 objectList.put(objectName);
             }
             graphicOverlay.add(new ObjectGraphic(graphicOverlay, object));
         }
+        sendPostRequest(objectList.toString());
         graphicOverlay.add(new InferenceInfoGraphic(graphicOverlay));
         graphicOverlay.postInvalidate();
     }
 
     private void speakText(String text) {
-        onPause();  // Pause the camera while text is spoken
+        onPause();
         new Thread(() -> {
             textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
-            // Wait for the speech to finish before resuming
             while (textToSpeech.isSpeaking()) {
                 try {
-                    Thread.sleep(1000);  // Check every 100ms if the speech is done
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-            runOnUiThread(() -> onResume());  // Resume the camera after speaking
+            runOnUiThread(this::onResume);
         }).start();
     }
 
@@ -235,7 +226,7 @@ public final class CameraXSourceDemoActivity extends AppCompatActivity implement
 
             JSONObject systemMessage = new JSONObject();
             systemMessage.put("role", "system");
-            systemMessage.put("content", "From a list of objects, create a description of what is happening in the room...");
+            systemMessage.put("content", "From a list of objects, create a description of what is happening in the room. No flowery language, just a succinct description. Do not assume the objects are next to each other. Do not assume there is a person in the room. Do not assume the number of objects listed.");
             messagesArray.put(systemMessage);
 
             JSONObject userMessage = new JSONObject();
@@ -243,26 +234,47 @@ public final class CameraXSourceDemoActivity extends AppCompatActivity implement
             userMessage.put("content", results);
             messagesArray.put(userMessage);
 
-            JSONObject assistantMessage = new JSONObject();
-            assistantMessage.put("role", "assistant");
-            assistantMessage.put("content", "");
-            messagesArray.put(assistantMessage);
-
             jsonBody.put("messages", messagesArray);
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        textToSpeech = new TextToSpeech(this.getApplicationContext(), new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int status) {
-                if (status != TextToSpeech.ERROR) {
-                    textToSpeech.setLanguage(Locale.ENGLISH);
-                }
-            }
-        });
+
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, jsonBody, response -> {
-            speakText(response.toString());
+            JSONObject jsonObject = null;
+            try {
+                jsonObject = new JSONObject(response.toString());
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+            JSONArray choicesArray = null;
+            try {
+                choicesArray = jsonObject.getJSONArray("choices");
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+
+            JSONObject firstChoice = null;
+            try {
+                firstChoice = choicesArray.getJSONObject(0);
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+
+            JSONObject messageObject = null;
+            try {
+                messageObject = firstChoice.getJSONObject("message");
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+
+            String content;
+            try {
+                content = messageObject.getString("content");
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+            speakText(content);
         }, error -> {
             Log.e(TAG, String.valueOf(error));
         }) {
@@ -277,15 +289,13 @@ public final class CameraXSourceDemoActivity extends AppCompatActivity implement
         requestQueue.add(jsonObjectRequest);
     }
 
-    private void onDetectionTaskFailure(Exception e) {
-        graphicOverlay.clear();
-        graphicOverlay.postInvalidate();
-        String error = "Failed to process. Error: " + e.getLocalizedMessage();
-        Toast.makeText(graphicOverlay.getContext(), error + "\nCause: " + e.getCause(), Toast.LENGTH_SHORT).show();
-        Log.d(TAG, error);
-    }
-
     private boolean isPortraitMode() {
         return getApplicationContext().getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE;
+    }
+
+    private void onDetectionTaskFailure(Exception e) {
+        Log.e(TAG, "Object detection failed!", e);
+        graphicOverlay.clear();
+        graphicOverlay.postInvalidate();
     }
 }
