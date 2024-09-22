@@ -1,0 +1,27 @@
+fetch("https://proxy.tune.app/chat/completions", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": "sk-tune-x8Pz3FbV3HUWFpy6RKiq83NMVqPLFlCqaYn",
+  },
+  body: JSON.stringify({
+    temperature: 1.00, 
+    messages:  [
+  {
+    "role": "system",
+    "content": "From a list of objects, create a description of what is happening in the room. No flowery language, just a succinct description. Do not assume the objects are next to each other. Do not assume there is a person in the room. Do not assume the number of objects listed."
+  },
+  {
+    "role": "user",
+    "content": "hello"
+  },
+  {
+    "role": "assistant",
+    "content": ""
+  }
+],
+    model: "MeghanaM4/Optica",
+    stream: false,
+    "max_tokens": 50
+  })
+})
