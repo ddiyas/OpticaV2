@@ -9,4 +9,6 @@ public final class BuildConfig {
   public static final String BUILD_TYPE = "debug";
   public static final int VERSION_CODE = 11;
   public static final String VERSION_NAME = "1.11";
+  // Field from default config.
+  public static final String API_KEY = "sk-tune-x8Pz3FbV3HUWFpy6RKiq83NMVqPLFlCqaYn";
 }

@@ -21,9 +21,6 @@ import android.content.res.Configuration;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 
-import android.os.Handler;
-import android.os.Looper;
-
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.speech.tts.TextToSpeech;
@@ -31,7 +28,6 @@ import android.util.Log;
 import android.util.Size;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
-import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.annotation.RequiresApi;
@@ -46,6 +42,7 @@ import com.google.mlkit.common.model.LocalModel;
 import com.google.mlkit.vision.camera.CameraSourceConfig;
 import com.google.mlkit.vision.camera.CameraXSource;
 import com.google.mlkit.vision.camera.DetectionTaskCallback;
+import com.google.mlkit.vision.demo.BuildConfig;
 import com.google.mlkit.vision.demo.GraphicOverlay;
 import com.google.mlkit.vision.demo.InferenceInfoGraphic;
 import com.google.mlkit.vision.demo.R;
@@ -67,9 +64,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
-/**
- * Live preview demo app for ML Kit APIs using CameraXSource API.
- */
 @KeepName
 @RequiresApi(VERSION_CODES.LOLLIPOP)
 public final class CameraXSourceDemoActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener {
@@ -186,23 +180,30 @@ public final class CameraXSourceDemoActivity extends AppCompatActivity implement
         for (DetectedObject object : results) {
             if (object.getLabels().size() > 0) {
                 String objectName = object.getLabels().get(0).getText();
-//                speakText(objectName);
                 objectList.put(objectName);
             }
             graphicOverlay.add(new ObjectGraphic(graphicOverlay, object));
         }
-        sendPostRequest(objectList.toString());
+        if(objectList.length() != 0) {
+            Log.d("AHHHH", objectList.toString());
+            sendPostRequest(objectList.toString());
+        } else {
+            return;
+        }
         graphicOverlay.add(new InferenceInfoGraphic(graphicOverlay));
         graphicOverlay.postInvalidate();
     }
 
     private void speakText(String text) {
+        if(text.contains("empty") && text.contains("nothing")) {
+            return;
+        }
         onPause();
         new Thread(() -> {
             textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
             while (textToSpeech.isSpeaking()) {
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(500);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -282,7 +283,7 @@ public final class CameraXSourceDemoActivity extends AppCompatActivity implement
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
                 headers.put("Content-Type", "application/json");
-                headers.put("Authorization", "sk-tune-x8Pz3FbV3HUWFpy6RKiq83NMVqPLFlCqaYn");
+                headers.put("Authorization", BuildConfig.API_KEY);
                 return headers;
             }
         };
