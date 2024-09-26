@@ -1,5 +1,5 @@
 # Optica
-A gateway for blind/visually impaired people to experience the world independently through computer vision.
+A gateway for blind/visually impaired people to experience the world independently through computer vision and text-to-speech.
 
 ## Tech Stack
 - MLKit
@@ -13,7 +13,7 @@ A gateway for blind/visually impaired people to experience the world independent
 Best Community Impact Hack    
 Best Use of Computer Vision   
 Best Use of AI    
-Super Fast AI Track (2nd place winner)          
+Super Fast AI Track - Cerebras (2nd place winner)          
 Best Next-Gen LLM-Powered Application    
 Best DEI Hack   
 
